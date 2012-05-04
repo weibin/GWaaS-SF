@@ -42,7 +42,7 @@ public class DestinationMsgTransformer extends AbstractMessageAwareTransformer {
 		String protocl = this.MsgtypeToTransportMap.get(device_data_type.toLowerCase());
 	
 		
-		System.out.println("protocl is " + protocl + ", destination = "+ dest);
+		
 		if(protocl != null && dest != null)
 		{
 			arg0.setInvocationProperty("protocol", protocl);
