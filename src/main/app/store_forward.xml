@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:jdbc="http://www.mulesoft.org/schema/mule/jdbc" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="CE-3.2.1" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd 
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/2.0/mule-mongo.xsd 
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd 
+http://www.mulesoft.org/schema/mule/jdbc http://www.mulesoft.org/schema/mule/jdbc/current/mule-jdbc.xsd 
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd ">
+    <jms:activemq-connector name="GW_Active_MQ" username="${translator.delivery.jms.username}" password="${translator.delivery.jms.password}" brokerURL="${translator.delivery.jms.url}" validateConnections="true" doc:name="GW_Active_MQ" doc:description="The Queue where the readings from gateway stored."/>
+    <jdbc:mysql-data-source name="GWAAS_MySQL_Data_Source" user="${gwaas.database.user}" password="${gwaas.database.password}" url="jdbc:mysql://${gwaas.database.host}:${gwaas.database.port}/${gwaas.database.name}" transactionIsolation="UNSPECIFIED" doc:name="GWAAS MySQL Data Source" doc:description="MySQL Data Source for device data profile lookup."/>
+    <file:connector name="File" outputPattern="readings" autoDelete="false" outputAppend="true" streaming="true" validateConnections="true" serialiseObjects="true" doc:name="File Connection" doc:description="Used for storing reading into file."/>
+    <jms:activemq-connector name="ForwardAppQueue" username="${app.delivery.jms.username}" password="${app.delivery.jms.password}" brokerURL="${app.delivery.jms.url}" validateConnections="true" durable="true" persistentDelivery="true" doc:name="Forward App Queue" doc:description="Queue to store messages from devices."/>
+    <mongo:config name="Mongo_DB" database="${gwaas.mongodb.dbname}" host="${gwaas.mongodb.host}" port="${gwaas.mongodb.port}" username="${gwaas.mongodb.username}" password="${gwaas.mongodb.password}" doc:name="Mongo DB" doc:description="Mongodb used to store messages from devices."/>
+    <jdbc:connector name="gwaas_Database__JDBC_" dataSource-ref="GWAAS_MySQL_Data_Source" validateConnections="true" queryTimeout="-1" pollingFrequency="0" doc:name="gwaas Database (JDBC) Connector "/>
+    <flow name="testDevicePropertyFlow1" doc:name="testDevicePropertyFlow1" processingStrategy="synchronous">
+        <jms:inbound-endpoint queue="${translator.delivery.jms.subject}" connector-ref="GW_Active_MQ" doc:name="GW Active MQ"/>
+        <logger message="STEP 1 - Incoming reading received : #[message:payload]" level="INFO" doc:name="Logger"/>
+        <enricher source="#[message:payload]" target="#[variable:idmap]" doc:name="Message Enricher">
+            <core:custom-transformer class="com.numrex.gwaas.storeNforward.JsonMsgTransformer" doc:name="Java"/>
+        </enricher>
+        <logger message="STEP 2: Incoming - Device ID =   #[json-node:readings/reading/device/[0]/value], Readings =  #[json-node:readings]" level="INFO" doc:name="Logger"/>
+        <enricher doc:name="Message Enricher">
+            <jdbc:outbound-endpoint exchange-pattern="request-response" queryKey="getDeiveProfile" responseTimeout="10000" mimeType="text/plain" queryTimeout="-1" connector-ref="gwaas_Database__JDBC_" doc:name="Device Profile Database">
+                <jdbc:query key="getDeiveProfile" value="SELECT `gwaas`.`device`.`dev_id`,&#10;    `gwaas`.`device`.`org_key`,&#10;    `gwaas`.`device`.`dev_key`,&#10;    `gwaas`.`organization`.`device_data_profile`,&#10;    `gwaas`.`device_data_profile`.`id`,&#10;    `gwaas`.`device_data_profile`.`delivery_type`,&#10;    `gwaas`.`device_data_profile`.`delivery_url`,&#10;    `gwaas`.`device_data_profile`.`delivery_format`,&#10;    `gwaas`.`device_data_profile`.`device_data_type`&#10;&#10;FROM &#10;    `gwaas`.`device`, &#10;    `gwaas`.`organization`, &#10;    `gwaas`.`device_data_profile`&#10;&#10;WHERE `gwaas`.`device`.`dev_id` = #[groovy:message.getInvocationProperty(&quot;idmap&quot;).get(&quot;device_id&quot;)] AND `gwaas`.`device`.`org_key` = `gwaas`.`organization`.`key`      &#10;AND `gwaas`.`organization`.`device_data_profile` = `gwaas`.`device_data_profile`.`id`;"/>
+            </jdbc:outbound-endpoint>
+            <enrich source="#[groovy:payload.get(0)]" target="#[variable:properties]"/>
+        </enricher>
+        <logger message="STEP 3 - Getting device data profile - #[groovy:message.toString()]" level="INFO" doc:name="Logger"/>
+        <custom-transformer class="com.numrex.gwaas.storeNforward.DestinationMsgTransformer" doc:name="Java"/>
+        <choice doc:name="Choice">
+            <when expression="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;forward&quot;" evaluator="groovy">
+                <processor-chain>
+                    <logger message="STEP 4 --  FORWARD #[message:payload]" level="INFO" doc:name="Logger"/>
+                    <flow-ref name="forwardAppQueue" doc:name="Forward to App Queue"/>
+                </processor-chain>
+            </when>
+            <when expression="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;push&quot;" evaluator="groovy">
+                <processor-chain>
+                    <logger message="STEP 4:  PUSH #[message:payload]" level="INFO" doc:name="Logger"/>
+                    <flow-ref name="pushToWebService" doc:name="Push to Web Service"/>
+                </processor-chain>
+            </when>
+            <when expression="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;pull&quot;" evaluator="groovy">
+                <processor-chain>
+                    <logger message="STEP 4 :  PULL  #[message:payload]" level="INFO" doc:name="Logger"/>
+                    <flow-ref name="storeForPull" doc:name="Store for Pull"/>
+                </processor-chain>
+            </when>
+            <otherwise>
+                <processor-chain>
+                    <logger message="STEP 4 -- Otherwise #[message:payload]" level="INFO" doc:name="Logger"/>
+                    <flow-ref name="doNothing" doc:name="Doo Nothing"/>
+                </processor-chain>
+            </otherwise>
+        </choice>
+    </flow>
+    <sub-flow name="forwardAppQueue" doc:name="forwardAppQueue" doc:description="Forward to queue which will be consumed by application service.">
+        <logger message="STEP 5 : Forward to APP Queue" level="INFO" doc:name="Logger"/>
+        <flow-ref name="DestinationChoices" doc:name="Flow Reference"/>
+    </sub-flow>
+    <sub-flow name="storeForPull" doc:name="storeForPull" doc:description="Store the message for application service to pull.">
+        <logger message="STEP 5 : Store For Pull" level="INFO" doc:name="Logger"/>
+        <flow-ref name="DestinationChoices" doc:name="Flow Reference"/>
+    </sub-flow>
+    <sub-flow name="pushToWebService" doc:name="pushToWebService" doc:description="Push message to a web service.">
+        <logger message="STEP 5 : PUSH to Web Service" level="INFO" doc:name="Logger"/>
+        <flow-ref name="DestinationChoices" doc:name="Flow Reference"/>
+    </sub-flow>
+    <sub-flow name="doNothing" doc:name="doNothing">
+        <mulexml:object-to-xml-transformer doc:name="Object to XML"/>
+        <logger message="DoNothing flow #[message:payload]" level="INFO" doc:name="Logger"/>
+    </sub-flow>
+    <sub-flow name="ExceptionFlow" doc:name="ExceptionFlow" doc:description="Flow for handling exception.">
+        <logger message="Exception ........ #[message:payload]" level="INFO" doc:name="Logger"/>
+    </sub-flow>
+    <sub-flow name="DestinationChoices" doc:name="DestinationChoices" doc:description="Depending on the data profile, the message can be push to different endpoints.">
+        <choice doc:name="Choice">
+            <when expression="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;jms&quot;)==true" evaluator="groovy">
+                <processor-chain>
+                    <jms:outbound-endpoint queue="#[groovy:message.getInvocationProperty(&quot;destination&quot;)]" connector-ref="ForwardAppQueue" doc:name="Generic JMS"/>
+                    <logger message="STEP 6: Deliver to JMS Queue  #[groovy:message.toString()]" level="INFO" doc:name="Logger"/>
+                </processor-chain>
+            </when>
+            <when expression="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;http&quot;)==true" evaluator="groovy">
+                <processor-chain>
+                    <outbound-endpoint address="http://#[groovy:message.getInvocationProperty(&quot;destination&quot;)]" exchange-pattern="request-response" doc:name="Generic HTTP"/>
+                    <logger message="STEP 6: Deliver to HTTP #[groovy:message.toString()]" level="INFO" doc:name="Logger"/>
+                </processor-chain>
+            </when>
+            <when expression="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;file&quot;)==true" evaluator="groovy">
+                <processor-chain>
+                    <file:outbound-endpoint path="#[groovy:message.getInvocationProperty(&quot;destination&quot;)]" outputPattern="reading_#[function:dateStamp]" connector-ref="File" doc:name="File"/>
+                    <logger message="STEP 6: Write to file" level="INFO" doc:name="Logger"/>
+                </processor-chain>
+            </when>
+            <when expression="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;mongodb&quot;)==true" evaluator="groovy">
+                <processor-chain>
+                    <mongo:insert-object-from-map config-ref="Mongo_DB" collection="#[groovy:message.getInvocationProperty(&quot;destination&quot;)]" doc:name="Mongo DB">
+                        <mongo:element-attributes>
+                            <mongo:element-attribute key="#[groovy:message.getInvocationProperty(&quot;properties&quot;).get(&quot;dev_key&quot;)]">#[message:payload]</mongo:element-attribute>
+                        </mongo:element-attributes>
+                    </mongo:insert-object-from-map>
+                    <logger level="INFO" doc:name="Logger"/>
+                </processor-chain>
+            </when>
+        </choice>
+    </sub-flow>
+</mule>

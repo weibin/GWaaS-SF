@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Ajax Spell Checker</title>
+<script type="text/javascript" src="mule-resource/js/mule.js"></script>
+
+<script type="text/javascript">
+	function callEcho()
+	{
+  	var data = new Object();
+  	data.phrase = document.getElementById('txt1').value;
+  	mule.rpc("/services/echo", data, callEchoResponse);
+	}
+
+
+function callEchoResponse(message)
+{
+    document.getElementById("response").innerHTML = "<b>Response:&nbsp;</b>" + message.data + "\n";
+}
+</script>
+
+</head>
+<body>
+<input type="text" id="txt1" onkeyup="callEcho()" />
+
+
+<div id="response"></div>
+
+</body>
+</html>
