@@ -23,7 +23,7 @@ public class JsonMsgTransformer extends AbstractMessageAwareTransformer {
 			throws TransformerException {
 		// TODO Auto-generated method stub
 		
-		System.out.println("Json Msg Transformer - " + arg0);
+	
 		
 		String a="";
 		try {
@@ -61,15 +61,7 @@ public class JsonMsgTransformer extends AbstractMessageAwareTransformer {
             keymap.put(name, value);
 		}
 		
-		System.out.println("keymap = " + keymap);
 		
-		
-		try {
-			System.out.println("JSon Msg Transformer Msg =  " + arg0.getPayload());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		return keymap;
 
