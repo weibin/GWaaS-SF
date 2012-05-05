@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <mule-configuration xmlns="http://www.mulesoft.com/tooling/messageflow" name="testDeviceProperty">
-    <global-element type="http://www.mulesoft.org/schema/mule/jms/activemq-xa-connector" name="GW_Active_MQ" entity-id="4610daba-02d3-48f5-9797-367aed14b00e">
+    <global-element type="http://www.mulesoft.org/schema/mule/jms/activemq-xa-connector" name="GW_Active_MQ" entity-id="c56d3f1f-7180-43a0-80ba-f9feda486d00">
         <properties>
             <property value="GW_Active_MQ" name="name"/>
             <property name="specification"/>
@@ -62,7 +62,7 @@
         </properties>
         <description>The Queue where the readings from gateway stored.</description>
     </global-element>
-    <global-element type="http://www.mulesoft.org/schema/mule/jdbc/mysql-data-source" name="GWAAS MySQL Data Source" entity-id="57970e78-b7a4-43f2-b463-12f660e1e5b8">
+    <global-element type="http://www.mulesoft.org/schema/mule/jdbc/mysql-data-source" name="GWAAS MySQL Data Source" entity-id="34273ae9-2f64-432d-b16b-b7c2b128dec4">
         <properties>
             <property value="GWAAS_MySQL_Data_Source" name="name"/>
             <property value="${gwaas.database.user}" name="user"/>
@@ -76,7 +76,7 @@
         </properties>
         <description>MySQL Data Source for device data profile lookup.</description>
     </global-element>
-    <global-element type="org.mule.tooling.ui.modules.core.global.fileConnector" name="File Connection" entity-id="37a1c977-07df-4991-93cc-0de388112476">
+    <global-element type="org.mule.tooling.ui.modules.core.global.fileConnector" name="File Connection" entity-id="96a9eacb-4c47-4218-ba41-e52b55048a68">
         <properties>
             <property value="File" name="name"/>
             <property value="readings" name="outputPattern"/>
@@ -101,7 +101,7 @@
         </properties>
         <description>Used for storing reading into file.</description>
     </global-element>
-    <global-element type="http://www.mulesoft.org/schema/mule/jms/activemq-xa-connector" name="Forward App Queue" entity-id="a54b00d3-99a4-4b0d-9fad-07d447306a40">
+    <global-element type="http://www.mulesoft.org/schema/mule/jms/activemq-xa-connector" name="Forward App Queue" entity-id="648e1bbe-4868-4869-808b-f7bc142a935b">
         <properties>
             <property value="ForwardAppQueue" name="name"/>
             <property name="specification"/>
@@ -163,7 +163,7 @@
         </properties>
         <description>Queue to store messages from devices.</description>
     </global-element>
-    <global-element type="http://www.mulesoft.org/schema/mule/mongo/config" name="Mongo DB" entity-id="6b5bb589-a243-4530-a094-2855009e0930">
+    <global-element type="http://www.mulesoft.org/schema/mule/mongo/config" name="Mongo DB" entity-id="92b6b434-5633-49af-b980-3de04e413e43">
         <properties>
             <property value="Mongo_DB" name="name"/>
             <property value="${gwaas.mongodb.dbname}" name="database"/>
@@ -174,7 +174,7 @@
         </properties>
         <description>Mongodb used to store messages from devices.</description>
     </global-element>
-    <global-element type="org.mule.tooling.ui.modules.core.global.jdbcConnector" name="gwaas Database (JDBC) Connector " entity-id="c5153f7c-51d7-48e6-8c4b-83dac7a13dd4">
+    <global-element type="org.mule.tooling.ui.modules.core.global.jdbcConnector" name="gwaas Database (JDBC) Connector " entity-id="1cc1890c-04ba-406b-bf99-c58085cc01f6">
         <properties>
             <property value="gwaas_Database__JDBC_" name="name"/>
             <property value="GWAAS_MySQL_Data_Source" name="dataSource-ref to JDBC DataSource"/>
@@ -194,8 +194,8 @@
             <property value="synchronous" name="processingStrategy2"/>
             <property value="synchronous" name="processingStrategy"/>
         </properties>
-        <lane entity-id="d05f2df7-eceb-480b-b066-4cc4b761872e">
-            <endpoint message-exchange-pattern="OneWay" direction="Inbound" type="http://www.mulesoft.org/schema/mule/jms/endpoint" name="GW Active MQ" entity-id="d33b788a-e49f-4e1c-9cf6-9011e8b09371">
+        <lane entity-id="26664f1e-5b17-472c-a0c9-a28504e4d07e">
+            <endpoint message-exchange-pattern="OneWay" direction="Inbound" type="http://www.mulesoft.org/schema/mule/jms/endpoint" name="GW Active MQ" entity-id="0234c1d7-6468-41ca-bf10-32195dbcb832">
                 <properties>
                     <property value="one-way" name="exchange-pattern"/>
                     <property value="${translator.delivery.jms.subject}" name="queue"/>
@@ -214,21 +214,21 @@
                     <property name="responseTransformer-refs"/>
                 </properties>
             </endpoint>
-            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="4ac32e91-b622-4084-bcc3-eec5242f4199">
+            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="dae7fb91-2ad6-429b-a477-0e7d785d005d">
                 <properties>
                     <property value="STEP 1 - Incoming reading received : #[message:payload]" name="message"/>
                     <property value="INFO" name="level"/>
                     <property name="category"/>
                 </properties>
             </pattern>
-            <scope type="org.mule.tooling.ui.modules.core.scope.enricher" name="Message Enricher" entity-id="f7c69d5e-4755-4732-9dcc-76d16929017b">
+            <scope type="org.mule.tooling.ui.modules.core.scope.enricher" name="Message Enricher" entity-id="551e9e94-ceef-4c74-991d-9dde920b44c5">
                 <properties>
                     <property value="#[message:payload]" name="source"/>
                     <property value="#[variable:idmap]" name="target"/>
                 </properties>
-                <compartment entity-id="0aced7fb-e432-4136-8a4c-856609de7288">
-                    <lane entity-id="b0fa567c-918c-42fa-a3d3-4b5b568b3df9">
-                        <pattern type="org.mule.tooling.ui.modules.core.pattern.customTransformer" name="Java" entity-id="0e9776e4-4f8b-4a54-a1d3-c5b1eda8b434">
+                <compartment entity-id="b69726dc-82ab-4ab8-a66b-943370ed5e5a">
+                    <lane entity-id="fb9a42f0-a1d1-4ad9-8afa-1787458ca45c">
+                        <pattern type="org.mule.tooling.ui.modules.core.pattern.customTransformer" name="Java" entity-id="39a9c562-e27a-4e83-9409-498f2ca57653">
                             <properties>
 <property name="returnClass"/>
 <property name="ignoreBadInput"/>
@@ -240,14 +240,14 @@
                     </lane>
                 </compartment>
             </scope>
-            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="42f37fb5-1fdc-434d-816f-decb8ff1186f">
+            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="f8aa4010-3e6e-41d9-b35e-2ccd187ecfc2">
                 <properties>
                     <property value="STEP 2: Incoming - Device ID =   #[json-node:readings/reading/device/[0]/value], Readings =  #[json-node:readings]" name="message"/>
                     <property value="INFO" name="level"/>
                     <property name="category"/>
                 </properties>
             </pattern>
-            <scope type="org.mule.tooling.ui.modules.core.scope.enricher" name="Message Enricher" entity-id="ba53f69a-3248-46d3-926d-8af1b119d3aa">
+            <scope type="org.mule.tooling.ui.modules.core.scope.enricher" name="Message Enricher" entity-id="09378286-d41a-4de4-97aa-8c914253b325">
                 <properties>
                     <property name="source"/>
                     <property name="target"/>
@@ -256,9 +256,9 @@
                         <property value="#[variable:properties]" name="target"/>
                     </property-collection>
                 </properties>
-                <compartment entity-id="36ea4309-4a11-4ac6-a1d2-6b3e1d2c0eb8">
-                    <lane entity-id="62a6cff3-73c6-42f0-b0ff-af06601d57e3">
-                        <endpoint message-exchange-pattern="OneWay" direction="Outbound" type="http://www.mulesoft.org/schema/mule/jdbc/endpoint" name="Device Profile Database" entity-id="d96fed67-6a18-4b16-b549-ae639414aea9">
+                <compartment entity-id="8d75bcfa-619a-4e17-a4cf-9b480d9109db">
+                    <lane entity-id="aaf4c215-e1ab-431d-b76f-144e7fd9729c">
+                        <endpoint message-exchange-pattern="OneWay" direction="Outbound" type="http://www.mulesoft.org/schema/mule/jdbc/endpoint" name="Device Profile Database" entity-id="2aebd205-ecf5-4658-a8e7-9d70a54ad319">
                             <properties>
 <property value="" name="ref"/>
 <property value="" name="transformer-refs"/>
@@ -283,62 +283,69 @@
                     </lane>
                 </compartment>
             </scope>
-            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="63d07d09-76bc-4c33-9e82-ca9301a77eb3">
+            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="2a6e769d-f239-4e06-aa2f-2af07d52d5b7">
                 <properties>
                     <property value="STEP 3 - Getting device data profile - #[groovy:message.toString()]" name="message"/>
                     <property value="INFO" name="level"/>
                     <property name="category"/>
                 </properties>
             </pattern>
-            <pattern type="org.mule.tooling.ui.modules.core.pattern.customTransformer" name="Java" entity-id="620935d9-81ab-4de6-94e7-8d4161fc6395">
+            <pattern type="org.mule.tooling.ui.modules.core.pattern.customTransformer" name="Java" entity-id="69a8a291-1aad-4ff1-90ac-5ea74e1a7324">
                 <properties>
-                    <property name="returnClass"/>
-                    <property name="ignoreBadInput"/>
-                    <property name="encoding"/>
-                    <property name="mimeType"/>
+                    <property value="" name="returnClass"/>
+                    <property value="false" name="ignoreBadInput"/>
+                    <property value="" name="encoding"/>
                     <property value="com.numrex.gwaas.storeNforward.DestinationMsgTransformer" name="class"/>
+                    <property value="" name="mimeType"/>
                 </properties>
+                <description>Store the delivery transport and destination from device profile database.</description>
             </pattern>
-            <splitter type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="a002b67e-59f4-43f0-856f-099b7d2979fb">
+            <splitter type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="045190a1-721b-497c-b59d-cba15ec063f7">
                 <properties>
-                    <property-collection name="b4ff9fd7-8578-4126-8733-e9cbc8cf1aa1">
-                        <property value="true" name="choice.otherwise"/>
-                    </property-collection>
-                    <property-collection name="81a604ca-45fe-469e-8f50-9860b001d9d9">
+                    <property-collection name="9258bc67-6472-4f2e-85fc-eaed1d135019">
                         <property value="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;pull&quot;" name="choice.expression"/>
                         <property value="groovy" name="choice.evaluator"/>
                     </property-collection>
-                    <property-collection name="14da2abd-96ab-4275-abe6-33ada8799f40">
-                        <property value="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;push&quot;" name="choice.expression"/>
-                        <property value="groovy" name="choice.evaluator"/>
-                    </property-collection>
-                    <property-collection name="0d5876a8-d85c-4cd0-8ddd-82bae215e233">
+                    <property-collection name="4655334f-b76e-4b9b-9e29-b2a17cc8698c">
                         <property value="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;forward&quot;" name="choice.expression"/>
                         <property value="groovy" name="choice.evaluator"/>
                     </property-collection>
+                    <property-collection name="845e152d-c842-42bc-be0e-9c5744be50ee">
+                        <property value="true" name="choice.otherwise"/>
+                        <property value="" name="choice.expression"/>
+                        <property value="" name="choice.evaluator"/>
+                    </property-collection>
+                    <property-collection name="a19ff769-6cd3-478a-8a4b-749216621f15">
+                        <property value="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;push&quot;" name="choice.expression"/>
+                        <property value="groovy" name="choice.evaluator"/>
+                    </property-collection>
                 </properties>
-                <pattern type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="3a7c09b9-17d3-4b68-8249-1c682b8aa803">
+                <description>Choices for  either forward, push or store for pull.</description>
+                <pattern type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="7a64813d-d25a-49b4-8097-bf328f132421">
                     <properties>
-                        <property-collection name="b4ff9fd7-8578-4126-8733-e9cbc8cf1aa1">
-                            <property value="true" name="choice.otherwise"/>
-                        </property-collection>
-                        <property-collection name="81a604ca-45fe-469e-8f50-9860b001d9d9">
+                        <property-collection name="9258bc67-6472-4f2e-85fc-eaed1d135019">
                             <property value="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;pull&quot;" name="choice.expression"/>
                             <property value="groovy" name="choice.evaluator"/>
                         </property-collection>
-                        <property-collection name="14da2abd-96ab-4275-abe6-33ada8799f40">
-                            <property value="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;push&quot;" name="choice.expression"/>
-                            <property value="groovy" name="choice.evaluator"/>
-                        </property-collection>
-                        <property-collection name="0d5876a8-d85c-4cd0-8ddd-82bae215e233">
+                        <property-collection name="4655334f-b76e-4b9b-9e29-b2a17cc8698c">
                             <property value="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;forward&quot;" name="choice.expression"/>
                             <property value="groovy" name="choice.evaluator"/>
                         </property-collection>
+                        <property-collection name="845e152d-c842-42bc-be0e-9c5744be50ee">
+                            <property value="true" name="choice.otherwise"/>
+                            <property value="" name="choice.expression"/>
+                            <property value="" name="choice.evaluator"/>
+                        </property-collection>
+                        <property-collection name="a19ff769-6cd3-478a-8a4b-749216621f15">
+                            <property value="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;push&quot;" name="choice.expression"/>
+                            <property value="groovy" name="choice.evaluator"/>
+                        </property-collection>
                     </properties>
+                    <description>Choices for  either forward, push or store for pull.</description>
                 </pattern>
-                <compartment entity-id="5f5b34dc-02a0-4cc5-a6ff-7b040553e42b">
-                    <lane entity-id="0d5876a8-d85c-4cd0-8ddd-82bae215e233">
-                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="7c7cbb74-476f-474e-8b10-11d7ac821b7e">
+                <compartment entity-id="9d506e2f-98cd-48d4-8688-f7fbc49b581b">
+                    <lane entity-id="4655334f-b76e-4b9b-9e29-b2a17cc8698c">
+                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="a1156ff3-667d-4692-b3e7-263357f02b35">
                             <properties>
 <property value="STEP 4 --  FORWARD #[message:payload]" name="message"/>
 <property value="" name="category"/>
@@ -346,49 +353,50 @@
                             </properties>
                             <description></description>
                         </pattern>
-                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Forward to App Queue" entity-id="3a096585-c72e-45cf-a3f6-e4fb29ce511d">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Forward to App Queue" entity-id="f93b26e2-44c6-4bfe-b43a-a71214f421dc">
                             <properties>
 <property value="forwardAppQueue" name="name"/>
                             </properties>
                         </pattern>
                     </lane>
-                    <lane entity-id="14da2abd-96ab-4275-abe6-33ada8799f40">
-                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="5b67668a-1b63-4822-a61d-ba73e61efde0">
+                    <lane entity-id="a19ff769-6cd3-478a-8a4b-749216621f15">
+                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="1a9e45b9-3ede-43ae-9418-e7217fdafb60">
                             <properties>
 <property value="STEP 4:  PUSH #[message:payload]" name="message"/>
+<property value="" name="category"/>
 <property value="INFO" name="level"/>
-<property name="category"/>
                             </properties>
+                            <description></description>
                         </pattern>
-                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Push to Web Service" entity-id="17316e5b-cfeb-442f-96b0-04cc5e5928e6">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Push to Web Service" entity-id="0a0bba17-1cd9-4479-b47e-b87f9b555902">
                             <properties>
 <property value="pushToWebService" name="name"/>
                             </properties>
                         </pattern>
                     </lane>
-                    <lane entity-id="81a604ca-45fe-469e-8f50-9860b001d9d9">
-                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="446fde80-6832-48c7-a47c-8b80e5b21aad">
+                    <lane entity-id="9258bc67-6472-4f2e-85fc-eaed1d135019">
+                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="2a243462-0c42-40df-aecf-626596889033">
                             <properties>
 <property value="STEP 4 :  PULL  #[message:payload]" name="message"/>
 <property value="INFO" name="level"/>
 <property name="category"/>
                             </properties>
                         </pattern>
-                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Store for Pull" entity-id="8abb5365-794d-474a-a2fa-0cf8e761a680">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Store for Pull" entity-id="dcf66c51-aef7-4d49-a4a5-f9c654ac55c3">
                             <properties>
 <property value="storeForPull" name="name"/>
                             </properties>
                         </pattern>
                     </lane>
-                    <lane entity-id="b4ff9fd7-8578-4126-8733-e9cbc8cf1aa1">
-                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="41b2506a-2a13-400b-95d3-989e8cefb54a">
+                    <lane entity-id="845e152d-c842-42bc-be0e-9c5744be50ee">
+                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="21905fd6-bf51-4f99-8e4d-762ed0b33b6f">
                             <properties>
 <property value="STEP 4 -- Otherwise #[message:payload]" name="message"/>
 <property value="INFO" name="level"/>
 <property name="category"/>
                             </properties>
                         </pattern>
-                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Doo Nothing" entity-id="55306bee-0a52-4681-852a-8166862c6440">
+                        <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Doo Nothing" entity-id="a8d00788-ff1a-4fcf-a635-acd1d16dfb72">
                             <properties>
 <property value="doNothing" name="name"/>
                             </properties>
@@ -404,8 +412,8 @@
             <property name="processingStrategy"/>
         </properties>
         <description>Forward to queue which will be consumed by application service.</description>
-        <lane entity-id="c0b3e2a4-8af5-42b5-9aa5-7c3a6e886e50">
-            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="999b517d-6540-46e2-94cb-408fc522078e">
+        <lane entity-id="6aa0bb38-8999-4070-9a2f-13dfc3c16b4d">
+            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="aec29bd1-fac1-475f-ae53-74d6fb580e10">
                 <properties>
                     <property value="STEP 5 : Forward to APP Queue" name="message"/>
                     <property value="" name="category"/>
@@ -413,7 +421,7 @@
                 </properties>
                 <description></description>
             </pattern>
-            <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Flow Reference" entity-id="7397a9ec-e943-4d89-a101-f6bae0f16fbd">
+            <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Flow Reference" entity-id="2e8fdfd4-0d7e-413f-8c37-d250e32803ce">
                 <properties>
                     <property value="DestinationChoices" name="name"/>
                 </properties>
@@ -426,15 +434,15 @@
             <property name="processingStrategy"/>
         </properties>
         <description>Store the message for application service to pull.</description>
-        <lane entity-id="5e738032-9fb2-4eea-9f7d-6450e9a25b29">
-            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="96da0262-f5cf-4441-af67-ef8b52d1a61a">
+        <lane entity-id="77f7bc77-b35d-41f6-ad75-545d150c5502">
+            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="948ffe61-e9ed-490f-b372-eae27fea1ef4">
                 <properties>
                     <property value="STEP 5 : Store For Pull" name="message"/>
                     <property value="INFO" name="level"/>
                     <property name="category"/>
                 </properties>
             </pattern>
-            <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Flow Reference" entity-id="7e70801e-e249-492a-a336-a4a3f90056e3">
+            <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Flow Reference" entity-id="1d517675-1a6f-48c4-9415-1351625416f8">
                 <properties>
                     <property value="DestinationChoices" name="name"/>
                 </properties>
@@ -447,15 +455,15 @@
             <property name="processingStrategy"/>
         </properties>
         <description>Push message to a web service.</description>
-        <lane entity-id="ac7b37db-79ee-4637-943e-686c5b4bcb3c">
-            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="785eca2b-32a6-4100-ad49-ceb067c847ef">
+        <lane entity-id="502c4543-56d1-4916-acbe-213d505a55dd">
+            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="9792bb35-b978-4e64-8847-8d5b28f2ce07">
                 <properties>
                     <property value="STEP 5 : PUSH to Web Service" name="message"/>
                     <property value="INFO" name="level"/>
                     <property name="category"/>
                 </properties>
             </pattern>
-            <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Flow Reference" entity-id="75741639-77c1-4f2f-8cd7-bce98739b952">
+            <pattern type="http://www.mulesoft.org/schema/mule/core/flow-ref" name="Flow Reference" entity-id="d5839018-398e-435b-9659-0b874285285a">
                 <properties>
                     <property value="DestinationChoices" name="name"/>
                 </properties>
@@ -467,8 +475,8 @@
             <property name="processingStrategy2"/>
             <property name="processingStrategy"/>
         </properties>
-        <lane entity-id="1af807dd-507c-465e-ab5c-62f34067cada">
-            <pattern type="org.mule.tooling.ui.modules.core.pattern.objectToXmlTransformer" name="Object to XML" entity-id="657b1c37-ac6c-42d1-8505-7b6b771c7fad">
+        <lane entity-id="11f0145a-1751-4919-80d8-364d9617b672">
+            <pattern type="org.mule.tooling.ui.modules.core.pattern.objectToXmlTransformer" name="Object to XML" entity-id="c35a81a8-d750-4665-95db-810d259e7ea4">
                 <properties>
                     <property name="returnClass"/>
                     <property name="ignoreBadInput"/>
@@ -478,13 +486,12 @@
                     <property name="acceptMuleMessage"/>
                 </properties>
             </pattern>
-            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="3325c1bd-9c46-4e8b-96ad-98b0639ac000">
+            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="10018c5b-90e5-456e-ad16-a08e410a19ca">
                 <properties>
                     <property value="DoNothing flow #[message:payload]" name="message"/>
-                    <property value="" name="category"/>
                     <property value="INFO" name="level"/>
+                    <property name="category"/>
                 </properties>
-                <description></description>
             </pattern>
         </lane>
     </flow>
@@ -494,12 +501,12 @@
             <property name="processingStrategy"/>
         </properties>
         <description>Flow for handling exception.</description>
-        <lane entity-id="65707959-aeb6-4ac1-af38-4f5534602169">
-            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="1b34c702-41c3-49be-ac39-143b3822e98e">
+        <lane entity-id="ccc942db-7ac6-4a5a-a55a-895c3e73de64">
+            <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="247c50fd-8fc4-4559-a1e9-880526d9c556">
                 <properties>
                     <property value="Exception ........ #[message:payload]" name="message"/>
                     <property value="" name="category"/>
-                    <property value="INFO" name="level"/>
+                    <property value="ERROR" name="level"/>
                 </properties>
                 <description></description>
             </pattern>
@@ -511,77 +518,88 @@
             <property name="processingStrategy"/>
         </properties>
         <description>Depending on the data profile, the message can be push to different endpoints.</description>
-        <lane entity-id="5696d8a6-ecef-476f-9b08-db4323c0e176">
-            <splitter type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="f021152a-c6af-4174-bcb7-2c2af6f1907e">
+        <lane entity-id="9c5f4986-c8d7-4090-87c6-e44b37fc058b">
+            <splitter type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="bcc61e9c-e24c-4541-9f77-26caeedb9076">
                 <properties>
-                    <property-collection name="c6e6a548-3713-4ec4-a0ed-09a47cb244a9">
-                        <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;file&quot;)==true" name="choice.expression"/>
-                        <property value="groovy" name="choice.evaluator"/>
-                    </property-collection>
-                    <property-collection name="35e53e15-5e6b-4689-9652-39868c69e9a5">
-                        <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;mongodb&quot;)==true" name="choice.expression"/>
-                        <property value="groovy" name="choice.evaluator"/>
-                    </property-collection>
-                    <property-collection name="63fd64c7-d6e6-4c4d-a7c1-1866d72191de">
-                        <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;jms&quot;)==true" name="choice.expression"/>
-                        <property value="groovy" name="choice.evaluator"/>
-                    </property-collection>
-                    <property-collection name="9d6a5585-52a6-4728-a90c-1f3de144ed60">
+                    <property-collection name="b8701ea0-5406-4fab-ab09-b108daa52481">
                         <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;http&quot;)==true" name="choice.expression"/>
                         <property value="groovy" name="choice.evaluator"/>
                     </property-collection>
+                    <property-collection name="f8acc101-1580-4eb1-96f1-629e2ef871b2">
+                        <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;mongodb&quot;)==true" name="choice.expression"/>
+                        <property value="groovy" name="choice.evaluator"/>
+                    </property-collection>
+                    <property-collection name="ed5336c4-990e-453c-9710-37a6449964cf">
+                        <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;file&quot;)==true" name="choice.expression"/>
+                        <property value="groovy" name="choice.evaluator"/>
+                    </property-collection>
+                    <property-collection name="10b0a40b-4f83-4f26-a6bc-5864218a33b9">
+                        <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;jms&quot;)==true" name="choice.expression"/>
+                        <property value="groovy" name="choice.evaluator"/>
+                    </property-collection>
                 </properties>
-                <pattern type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="a28c0904-3774-4794-b249-a9e3a7ffce99">
+                <description>Choice to determine the destination based on the 
+device_data_profile.device_data_type. 
+
+	&quot;message&quot;	:  to jms
+	&quot;http&quot;	:  to WS
+	&quot;event&quot;	:  to mongodb</description>
+                <pattern type="org.mule.tooling.ui.modules.core.pattern.cbr" name="Choice" entity-id="fd3ea791-6678-4a1d-851e-53a1a6d78d5f">
                     <properties>
-                        <property-collection name="c6e6a548-3713-4ec4-a0ed-09a47cb244a9">
-                            <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;file&quot;)==true" name="choice.expression"/>
-                            <property value="groovy" name="choice.evaluator"/>
-                        </property-collection>
-                        <property-collection name="35e53e15-5e6b-4689-9652-39868c69e9a5">
-                            <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;mongodb&quot;)==true" name="choice.expression"/>
-                            <property value="groovy" name="choice.evaluator"/>
-                        </property-collection>
-                        <property-collection name="63fd64c7-d6e6-4c4d-a7c1-1866d72191de">
-                            <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;jms&quot;)==true" name="choice.expression"/>
-                            <property value="groovy" name="choice.evaluator"/>
-                        </property-collection>
-                        <property-collection name="9d6a5585-52a6-4728-a90c-1f3de144ed60">
+                        <property-collection name="b8701ea0-5406-4fab-ab09-b108daa52481">
                             <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;http&quot;)==true" name="choice.expression"/>
                             <property value="groovy" name="choice.evaluator"/>
                         </property-collection>
+                        <property-collection name="f8acc101-1580-4eb1-96f1-629e2ef871b2">
+                            <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;mongodb&quot;)==true" name="choice.expression"/>
+                            <property value="groovy" name="choice.evaluator"/>
+                        </property-collection>
+                        <property-collection name="ed5336c4-990e-453c-9710-37a6449964cf">
+                            <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;file&quot;)==true" name="choice.expression"/>
+                            <property value="groovy" name="choice.evaluator"/>
+                        </property-collection>
+                        <property-collection name="10b0a40b-4f83-4f26-a6bc-5864218a33b9">
+                            <property value="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;jms&quot;)==true" name="choice.expression"/>
+                            <property value="groovy" name="choice.evaluator"/>
+                        </property-collection>
                     </properties>
+                    <description>Choice to determine the destination based on the 
+device_data_profile.device_data_type. 
+
+	&quot;message&quot;	:  to jms
+	&quot;http&quot;	:  to WS
+	&quot;event&quot;	:  to mongodb</description>
                 </pattern>
-                <compartment entity-id="81887db5-5800-4e98-818c-17cd783dc312">
-                    <lane entity-id="63fd64c7-d6e6-4c4d-a7c1-1866d72191de">
-                        <endpoint message-exchange-pattern="OneWay" direction="Outbound" type="http://www.mulesoft.org/schema/mule/jms/endpoint" name="Generic JMS" entity-id="789770f0-f5c2-420a-9dcd-6a3ea0ea6556">
+                <compartment entity-id="e3277de5-af2b-45fc-bd51-cda83eaa014e">
+                    <lane entity-id="10b0a40b-4f83-4f26-a6bc-5864218a33b9">
+                        <endpoint message-exchange-pattern="OneWay" direction="Outbound" type="http://www.mulesoft.org/schema/mule/jms/endpoint" name="Generic JMS" entity-id="8455934b-c998-47d4-9113-58f0608c5f1e">
                             <properties>
-<property value="one-way" name="exchange-pattern"/>
+<property value="" name="ref"/>
 <property value="#[groovy:message.getInvocationProperty(&quot;destination&quot;)]" name="queue"/>
-<property name="topic"/>
-<property name="exchange-pattern"/>
-<property name="address"/>
-<property name="mimeType"/>
-<property name="responseTimeout"/>
-<property name="encoding"/>
-<property name="durableName"/>
-<property name="disableTransportTransformer"/>
-<property name="disableTemporaryReplyToDestinations"/>
-<property name="ref"/>
+<property value="" name="transformer-refs"/>
+<property value="" name="address"/>
+<property value="" name="encoding"/>
+<property value="" name="responseTransformer-refs"/>
+<property value="false" name="disableTransportTransformer"/>
+<property value="false" name="disableTemporaryReplyToDestinations"/>
+<property value="" name="responseTimeout"/>
+<property value="" name="mimeType"/>
+<property value="" name="exchange-pattern"/>
 <property value="ForwardAppQueue" name="connector-ref"/>
-<property name="transformer-refs"/>
-<property name="responseTransformer-refs"/>
                             </properties>
+                            <description></description>
                         </endpoint>
-                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="083efb4c-79eb-482c-a0b8-4c3e311ed785">
+                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="161c3e4b-ed53-436d-ae9a-9ba9062341e0">
                             <properties>
-<property value="STEP 6: Deliver to JMS Queue  #[groovy:message.toString()]" name="message"/>
+<property value="STEP 6: Deliver to JMS Queue #[groovy:message.getInvocationProperty(&quot;destination&quot;)] :   #[message:payload]" name="message"/>
+<property value="" name="category"/>
 <property value="INFO" name="level"/>
-<property name="category"/>
                             </properties>
+                            <description></description>
                         </pattern>
                     </lane>
-                    <lane entity-id="9d6a5585-52a6-4728-a90c-1f3de144ed60">
-                        <endpoint message-exchange-pattern="OneWay" direction="Outbound" type="http://www.mulesoft.org/schema/mule/core/endpoint" name="Generic HTTP" entity-id="5f49b700-0939-4618-9630-6d0fa4869d69">
+                    <lane entity-id="b8701ea0-5406-4fab-ab09-b108daa52481">
+                        <endpoint message-exchange-pattern="OneWay" direction="Outbound" type="http://www.mulesoft.org/schema/mule/core/endpoint" name="Generic HTTP" entity-id="8a794c5a-da36-4b34-8d31-e458794100e3">
                             <properties>
 <property value="" name="ref"/>
 <property value="" name="transformer-refs"/>
@@ -596,16 +614,17 @@
                             </properties>
                             <description></description>
                         </endpoint>
-                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="e18db57c-b2ad-488f-a4f5-fb5c0a5ca22d">
+                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="c4ed9529-2f4b-4760-a393-d36d56c6a2c0">
                             <properties>
 <property value="STEP 6: Deliver to HTTP #[groovy:message.toString()]" name="message"/>
+<property value="" name="category"/>
 <property value="INFO" name="level"/>
-<property name="category"/>
                             </properties>
+                            <description></description>
                         </pattern>
                     </lane>
-                    <lane entity-id="c6e6a548-3713-4ec4-a0ed-09a47cb244a9">
-                        <endpoint message-exchange-pattern="OneWay" direction="Outbound" type="http://www.mulesoft.org/schema/mule/file/endpoint" name="File" entity-id="0db5a1cb-bd8f-45eb-b32c-0f8e746bc59e">
+                    <lane entity-id="ed5336c4-990e-453c-9710-37a6449964cf">
+                        <endpoint message-exchange-pattern="OneWay" direction="Outbound" type="http://www.mulesoft.org/schema/mule/file/endpoint" name="File" entity-id="10b035e2-2b9c-42b9-a68c-437f4bfa30f2">
                             <properties>
 <property value="one-way" name="exchange-pattern"/>
 <property value="#[groovy:message.getInvocationProperty(&quot;destination&quot;)]" name="path"/>
@@ -627,16 +646,17 @@
 <property name="responseTransformer-refs"/>
                             </properties>
                         </endpoint>
-                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="b7164411-a74c-4973-84cb-85a47a893808">
+                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="b6fd166f-c118-4a86-93ee-1a2bbbbc3191">
                             <properties>
 <property value="STEP 6: Write to file" name="message"/>
+<property value="" name="category"/>
 <property value="INFO" name="level"/>
-<property name="category"/>
                             </properties>
+                            <description></description>
                         </pattern>
                     </lane>
-                    <lane entity-id="35e53e15-5e6b-4689-9652-39868c69e9a5">
-                        <pattern type="http://www.mulesoft.org/schema/mule/mongo/mongo-connector" name="Mongo DB" entity-id="228a4e6b-0f04-4700-9ed8-59a37c11ca48">
+                    <lane entity-id="f8acc101-1580-4eb1-96f1-629e2ef871b2">
+                        <pattern type="http://www.mulesoft.org/schema/mule/mongo/mongo-connector" name="Mongo DB" entity-id="9a0fb360-5688-491b-93ed-95bd5b8488fb">
                             <properties>
 <property value="" name=""/>
 <property value="" name="username"/>
@@ -645,23 +665,29 @@
 <property value="#[groovy:message.getInvocationProperty(&quot;destination&quot;)]" name="collection"/>
 <property value="" name="password"/>
 <property value="Mongo_DB" name="config-ref"/>
-<property-collection name="@http://www.mulesoft.org/schema/mule/mongo/insert-object-from-map-element-attributes;599514125">
+<property-collection name="@http://www.mulesoft.org/schema/mule/mongo/insert-object-from-map-element-attributes;1920632527">
     <property value="true" name="isProcessed$$$$"/>
-    <property-collection name="@http://www.mulesoft.org/schema/mule/mongo/insert-object-from-map-element-attribute;1676197874">
+    <property-collection name="@http://www.mulesoft.org/schema/mule/mongo/insert-object-from-map-element-attribute;1049482675">
         <property value="#[message:payload]" name="value"/>
-        <property value="#[groovy:message.getInvocationProperty(&quot;properties&quot;).get(&quot;dev_key&quot;)]" name="key"/>
+        <property value="payload" name="key"/>
+        <property value="true" name="isProcessed$$$$"/>
+    </property-collection>
+    <property-collection name="@http://www.mulesoft.org/schema/mule/mongo/insert-object-from-map-element-attribute;1663671205">
+        <property value="#[groovy:message.getInvocationProperty(&quot;properties&quot;).get(&quot;dev_key&quot;)]" name="value"/>
+        <property value="dev_key" name="key"/>
         <property value="true" name="isProcessed$$$$"/>
     </property-collection>
 </property-collection>
                             </properties>
-                            <description></description>
+                            <description>Store the incoming message into mongodb with { &quot;dev_key&quot;: dev_key}, {&quot;payload&quot;: message.payload}</description>
                         </pattern>
-                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="5af0057e-7709-4288-875f-cfdcbbea818a">
+                        <pattern type="org.mule.tooling.ui.modules.core.pattern.logger" name="Logger" entity-id="95fedcf2-7ff6-4fe7-8bba-8dd851e248b4">
                             <properties>
-<property name="message"/>
+<property value="Step 6: Deliver to mongodb #[groovy:message.getInvocationProperty(&quot;destination&quot;)] : Object ID:  #[message:payload] #[groovy:message.toString()]" name="message"/>
+<property value="" name="category"/>
 <property value="INFO" name="level"/>
-<property name="category"/>
                             </properties>
+                            <description></description>
                         </pattern>
                     </lane>
                 </compartment>

@@ -29,8 +29,8 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
             <enrich source="#[groovy:payload.get(0)]" target="#[variable:properties]"/>
         </enricher>
         <logger message="STEP 3 - Getting device data profile - #[groovy:message.toString()]" level="INFO" doc:name="Logger"/>
-        <custom-transformer class="com.numrex.gwaas.storeNforward.DestinationMsgTransformer" doc:name="Java"/>
-        <choice doc:name="Choice">
+        <custom-transformer class="com.numrex.gwaas.storeNforward.DestinationMsgTransformer" doc:name="Java" doc:description="Store the delivery transport and destination from device profile database."/>
+        <choice doc:name="Choice" doc:description="Choices for  either forward, push or store for pull.">
             <when expression="message.getInvocationProperty(&quot;properties&quot;).get(&quot;delivery_type&quot;)==&quot;forward&quot;" evaluator="groovy">
                 <processor-chain>
                     <logger message="STEP 4 --  FORWARD #[message:payload]" level="INFO" doc:name="Logger"/>
@@ -74,14 +74,19 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
         <logger message="DoNothing flow #[message:payload]" level="INFO" doc:name="Logger"/>
     </sub-flow>
     <sub-flow name="ExceptionFlow" doc:name="ExceptionFlow" doc:description="Flow for handling exception.">
-        <logger message="Exception ........ #[message:payload]" level="INFO" doc:name="Logger"/>
+        <logger message="Exception ........ #[message:payload]" level="ERROR" doc:name="Logger"/>
     </sub-flow>
     <sub-flow name="DestinationChoices" doc:name="DestinationChoices" doc:description="Depending on the data profile, the message can be push to different endpoints.">
-        <choice doc:name="Choice">
+        <choice doc:name="Choice" doc:description="Choice to determine the destination based on the 
+device_data_profile.device_data_type. 
+
+	&quot;message&quot;	:  to jms
+	&quot;http&quot;	:  to WS
+	&quot;event&quot;	:  to mongodb">
             <when expression="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;jms&quot;)==true" evaluator="groovy">
                 <processor-chain>
                     <jms:outbound-endpoint queue="#[groovy:message.getInvocationProperty(&quot;destination&quot;)]" connector-ref="ForwardAppQueue" doc:name="Generic JMS"/>
-                    <logger message="STEP 6: Deliver to JMS Queue  #[groovy:message.toString()]" level="INFO" doc:name="Logger"/>
+                    <logger message="STEP 6: Deliver to JMS Queue #[groovy:message.getInvocationProperty(&quot;destination&quot;)] :   #[message:payload]" level="INFO" doc:name="Logger"/>
                 </processor-chain>
             </when>
             <when expression="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;http&quot;)==true" evaluator="groovy">
@@ -98,12 +103,13 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
             </when>
             <when expression="message.getInvocationProperty(&quot;protocol&quot;).equals(&quot;mongodb&quot;)==true" evaluator="groovy">
                 <processor-chain>
-                    <mongo:insert-object-from-map config-ref="Mongo_DB" collection="#[groovy:message.getInvocationProperty(&quot;destination&quot;)]" doc:name="Mongo DB">
+                    <mongo:insert-object-from-map config-ref="Mongo_DB" collection="#[groovy:message.getInvocationProperty(&quot;destination&quot;)]" doc:name="Mongo DB" doc:description="Store the incoming message into mongodb with { &quot;dev_key&quot;: dev_key}, {&quot;payload&quot;: message.payload}">
                         <mongo:element-attributes>
-                            <mongo:element-attribute key="#[groovy:message.getInvocationProperty(&quot;properties&quot;).get(&quot;dev_key&quot;)]">#[message:payload]</mongo:element-attribute>
+                            <mongo:element-attribute key="payload">#[message:payload]</mongo:element-attribute>
+                            <mongo:element-attribute key="dev_key">#[groovy:message.getInvocationProperty("properties").get("dev_key")]</mongo:element-attribute>
                         </mongo:element-attributes>
                     </mongo:insert-object-from-map>
-                    <logger level="INFO" doc:name="Logger"/>
+                    <logger message="Step 6: Deliver to mongodb #[groovy:message.getInvocationProperty(&quot;destination&quot;)] : Object ID:  #[message:payload] #[groovy:message.toString()]" level="INFO" doc:name="Logger"/>
                 </processor-chain>
             </when>
         </choice>
